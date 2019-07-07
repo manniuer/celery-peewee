@@ -1,4 +1,4 @@
-from .baseentity import BaseEntity
+from .base_model import BaseEntity
 from .schedule_task import ScheduleTask
 from peewee import DateTimeField, ForeignKeyField, IntegerField
 

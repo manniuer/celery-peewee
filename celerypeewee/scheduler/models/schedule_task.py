@@ -1,4 +1,4 @@
-from .baseentity import BaseEntity
+from .base_model import BaseEntity
 from .crontab import Crontab
 from .interval import Interval
 from peewee import DateTimeField, ForeignKeyField, CharField, IntegerField, TextField, BooleanField
