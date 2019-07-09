@@ -4,6 +4,6 @@ from peewee import DateTimeField, ForeignKeyField, IntegerField
 
 
 class ScheduleMeta(BaseEntity):
+    parent = ForeignKeyField(column_name="id", field="id", backref='meta', model=ScheduleTask, primary_key=True)
     last_run_at = DateTimeField(null=True)
-    parent = ForeignKeyField(column_name="schedule_task_id", field="id", model=ScheduleTask, primary_key=True)
-    total_run_count = IntegerField(null=True)
+    total_run_count = IntegerField(null=True, default=0)

@@ -1,6 +1,7 @@
 from .base_model import BaseEntity
-from peewee import CharField
-from celery import schedules, current_app
+from .schedule_task import ScheduleTask
+from peewee import CharField, ForeignKeyField
+from celery import schedules
 
 
 class Crontab(BaseEntity):
@@ -9,6 +10,8 @@ class Crontab(BaseEntity):
     day_of_week = CharField(default="*")
     hour = CharField(default="*")
     minute = CharField(default="*")
+
+    parent = ForeignKeyField(ScheduleTask, backref='crontab')
 
     @property
     def schedule(self):
@@ -32,13 +35,7 @@ class Crontab(BaseEntity):
     @classmethod
     def from_schedule(cls, schedule: schedules.crontab):
         data = cls.schedule_to_dict(schedule)
-
-        instance = cls.get_or_none(*[
-            getattr(cls, k) == v for k, v in data.items()
-        ])
-
-        if not instance:
-            instance = cls.create(**data)
+        instance, created = cls.get_or_create(**data)
         return instance
 
     def __repr__(self):
