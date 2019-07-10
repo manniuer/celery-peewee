@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 class ScheduleInfo(BaseEntity):
-    last_changed_at = DateTimeField(null=True)
+    last_changed_at = DateTimeField(default=datetime.now)
 
     @classmethod
     def get_last_change_at(cls):
