@@ -5,12 +5,12 @@ from datetime import timedelta
 
 
 class Interval(BaseEntity):
-    every = IntegerField(null=True)
-    period = CharField(null=True)
+    every = IntegerField(default=1)
+    period = CharField(default='minutes')
 
     @property
     def schedule(self):
-        return schedules.schedule(timedelta(**(self.to_dict())))
+        return schedules.schedule(timedelta(**{self.period: self.every}))
 
     @classmethod
     def from_schedule(cls, schedule):
