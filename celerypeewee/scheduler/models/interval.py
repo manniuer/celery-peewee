@@ -1,6 +1,5 @@
 from .base_model import BaseEntity
-from .schedule_task import ScheduleTask
-from peewee import IntegerField, CharField, ForeignKeyField
+from peewee import IntegerField, CharField
 from celery import schedules
 from datetime import timedelta
 
@@ -8,8 +7,6 @@ from datetime import timedelta
 class Interval(BaseEntity):
     every = IntegerField(null=True)
     period = CharField(null=True)
-
-    parent = ForeignKeyField(ScheduleTask, backref='interval')
 
     @property
     def schedule(self):

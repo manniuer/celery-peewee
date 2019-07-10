@@ -3,7 +3,6 @@ from typing import Iterable
 from .base_model import BaseEntity
 from .crontab import Crontab
 from .interval import Interval
-from .schedule_meta import ScheduleMeta
 from peewee import DateTimeField, ForeignKeyField, CharField, TextField, BooleanField, AutoField
 from celery import current_app
 
@@ -14,8 +13,6 @@ class ScheduleTask(BaseEntity):
     task = CharField()
     task_args = TextField(default='[]')
     task_kwargs = TextField(default='{}')
-    interval_id = ForeignKeyField(column_name="interval_id", field="id", model=Interval, null=True)
-    crontab_id = ForeignKeyField(column_name="crontab_id", field="id", model=Crontab, null=True)
     queue = CharField(null=True)
     exchange = CharField(null=True)
     routing_key = CharField(null=True)
@@ -25,10 +22,8 @@ class ScheduleTask(BaseEntity):
     modified_at = DateTimeField(null=True)
     remarks = TextField(null=True)
 
-    @property
-    def meta(self):
-        meta, created = ScheduleMeta.get_or_create(id=self.id)
-        return meta
+    crontab = ForeignKeyField(Crontab, backref='tasks')
+    interval = ForeignKeyField(Interval, backref='tasks')
 
     @property
     def args(self):

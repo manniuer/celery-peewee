@@ -1,12 +1,16 @@
 from celerypeewee.scheduler.models.base_model import mysql_db as database
-from celerypeewee.scheduler.models import Crontab
+from celerypeewee.scheduler.models import Crontab, Interval, ScheduleMeta, ScheduleTask, ScheduleInfo
 
 
 def table_init():
     with database:
         database.create_tables(
             [
-                Crontab
+                Crontab,
+                Interval,
+                ScheduleInfo,
+                ScheduleTask,
+                ScheduleMeta
             ]
         )
 
