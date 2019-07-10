@@ -3,8 +3,8 @@ from playhouse.shortcuts import model_to_dict
 
 # TODO: Put the db info to a configure file.
 mysql_db = MySQLDatabase("test-celery-peewee",
-                         user='root', password='vanilla',
-                         host='192.168.93.149')
+                         user='root', password='peolinux',
+                         host='192.168.101.115')
 
 
 class BaseEntity(Model):
