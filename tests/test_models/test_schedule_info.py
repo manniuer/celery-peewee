@@ -1,4 +1,4 @@
-from celerypeewee.scheduler.models.schedule_info import ScheduleInfo
+from celerypeewee.scheduler.models import ScheduleInfo
 from datetime import datetime
 
 
