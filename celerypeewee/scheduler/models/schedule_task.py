@@ -1,10 +1,10 @@
 import json
-from typing import Iterable
 from .base_model import BaseEntity
 from .crontab import Crontab
 from .interval import Interval
 from peewee import DateTimeField, ForeignKeyField, CharField, TextField, BooleanField, AutoField
 from celery import current_app
+from datetime import datetime
 
 
 class ScheduleTask(BaseEntity):
@@ -18,19 +18,19 @@ class ScheduleTask(BaseEntity):
     routing_key = CharField(null=True)
     enabled = BooleanField(default=True)
     expires_at = DateTimeField(null=True)
-    created_at = DateTimeField(null=True)
+    created_at = DateTimeField(null=True, default=datetime.now)
     modified_at = DateTimeField(null=True)
     remarks = TextField(null=True)
 
-    crontab = ForeignKeyField(Crontab, backref='tasks')
-    interval = ForeignKeyField(Interval, backref='tasks')
+    crontab = ForeignKeyField(Crontab, backref='tasks', null=True)
+    interval = ForeignKeyField(Interval, backref='tasks', null=True)
 
     @property
     def args(self):
         return json.loads(self.task_args)
 
     @args.setter
-    def args(self, data: Iterable):
+    def args(self, data: list):
         self.task_args = json.dumps(data)
 
     @property
