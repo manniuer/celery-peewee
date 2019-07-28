@@ -2,6 +2,7 @@ import json
 from .base_model import BaseEntity
 from .crontab import Crontab
 from .interval import Interval
+from .schedule_meta import ScheduleMeta
 from peewee import DateTimeField, ForeignKeyField, CharField, TextField, BooleanField, AutoField
 from celery import current_app
 from datetime import datetime
@@ -24,6 +25,11 @@ class ScheduleTask(BaseEntity):
 
     crontab = ForeignKeyField(Crontab, backref='tasks', null=True)
     interval = ForeignKeyField(Interval, backref='tasks', null=True)
+
+    @property
+    def schedule_meta(self):
+        meta, _ = ScheduleMeta.get_or_create(id=self.id)
+        return meta
 
     @property
     def args(self):
