@@ -1,10 +1,11 @@
-from datetime import datetime
 from celery import current_app as celery_app
 from celery import schedules
 from celery.beat import ScheduleEntry, Scheduler
 from .models import Crontab, Interval, ScheduleTask, ScheduleMeta, ScheduleInfo
+from celerypeewee.utils.log_util import get_logger
 
 
+logger = get_logger()
 DEFAULT_MAX_INTERVAL = 5
 
 
@@ -90,3 +91,64 @@ class ModelEntry(ScheduleEntry):
         return entry
 
 
+class DatabaseSchedule(Scheduler):
+    _schedule = None
+    _initial_read = False
+    _last_timestamp = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Rewrite `max_interval` to a shorter time
+        self.max_interval = kwargs.get('max_interval') or DEFAULT_MAX_INTERVAL
+
+    def setup_schedule(self):
+        self.install_default_entries(self.schedule)
+        self.update_from_dict(self.app.conf.CELERYBEAT_SCHEDULE)
+
+    def install_default_entries(self, data):
+        entries = {}
+        if self.app.conf.CELERY_TASK_RESULT_EXPIRES:
+            self.update_from_dict(entries)
+
+    def update_from_dict(self, dict_):
+        _schedules = dict([
+            (name, ModelEntry.from_orig_entry(name, app=self.app, **entry))
+            for name, entry in dict_.items()
+        ])
+        return self.schedule.update(_schedules)
+
+    def all_as_schedule(self):
+        logger.info('DatabaseScheduler: fetching database schedules...')
+        return dict([
+            (x.name, ModelEntry(x, app=self.app))
+            for x in ScheduleTask.get_available_tasks()
+        ])
+
+    @property
+    def is_schedule_changed(self):
+        change_at = ScheduleInfo.get_last_change_at()
+        ts = self._last_timestamp or change_at
+
+        if change_at and change_at > ts:
+            self._last_timestamp = change_at
+            return True
+
+        self._last_timestamp = change_at
+        return False
+
+    @property
+    def schedule(self):
+        update = False
+        if not self._initial_read:
+            logger.info('DatabaseScheduler: initial read')
+            update = True
+            self._initial_read = True
+        elif self.is_schedule_changed:
+            logger.info('DatabaseScheduler: schedule changed')
+            update = True
+
+        if update:
+            self._schedule = self.all_as_schedule()
+
+        return self._schedule
